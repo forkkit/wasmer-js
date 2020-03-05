@@ -1,22 +1,23 @@
 {
   "name": "@wasmer/wasm-terminal",
-  "version": "0.1.0",
+  "version": "0.9.1",
   "description": "A terminal-like component for the browser, that fetches and runs Wasm modules in the context of a shell. 🐚",
-  "module": "dist/index.esm.js",
-  "browser": "dist/index.iife.js",
-  "typings": "dist/packages/wasm-terminal/lib/index.d.ts",
+  "module": "lib/unoptimized/wasm-terminal.esm.js",
+  "iife": "lib/unoptimized/wasm-terminal.iife.js",
+  "typings": "lib/unoptimized/packages/wasm-terminal/src/index.d.ts",
   "files": [
-    "dist",
-    "package.json",
-    "../../LICENSE",
-    "README.md"
+    "lib"
   ],
   "scripts": {
-    "build": "npx rollup -c --environment LIB,WORKER,PROD",
-    "dev": "npx rollup -c --environment LIB,WORKER",
-    "test": "npx jest --config jest.config.js",
-    "test:watch": "npx jest --config jest.config.js --watchAll",
-    "docs": "npx typedoc lib/ --out docs --target es6 --theme minimal --mode file"
+    "build": "run-s build:clean build:prod",
+    "build:clean": "rm -rf lib",
+    "build:ts": "tsc -b",
+    "build:prod": "rollup -c --environment LIB,WORKER,PROD",
+    "build:dev": "rollup -c --environment LIB,WORKER,DEV",
+    "dev": "watch \"npm run build:dev\" src",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watchAll",
+    "docs": "typedoc src/ --out docs --target es6 --theme minimal --mode file"
   },
   "repository": {
     "type": "git",
@@ -36,19 +37,23 @@
     "dom",
     "browser"
   ],
-  "author": "Aaron Turner",
+  "author": "Wasmer Engineering Team <engineering@wasmer.io>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/wasmerio/wasmer-js/issues"
   },
   "homepage": "https://github.com/wasmerio/wasmer-js/tree/master/packages/wasm-terminal",
   "dependencies": {
-    "@wasmer/wasi": "^0.1.0",
-    "@wasmer/wasm-transformer": "^0.1.0",
-    "@wasmer/wasmfs": "^0.1.0",
-    "comlink": "^4.0.2",
+    "@wasmer/io-devices": "file:../io-devices",
+    "@wasmer/wasi": "file:../wasi",
+    "@wasmer/wasmfs": "file:../wasmfs",
+    "comlink": "^4.0.5",
     "shell-parse": "0.0.2",
     "shell-quote": "^1.7.1",
-    "xterm": "^3.14.5"
-  }
+    "xterm": "^4.1.0",
+    "xterm-addon-fit": "^0.2.1",
+    "xterm-addon-web-links": "^0.2.1",
+    "xterm-addon-webgl": "^0.2.1"
+  },
+  "gitHead": "889c22135c81610ddecbb696f8ef24f7ecaf5db7"
 }

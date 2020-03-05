@@ -2,6 +2,8 @@
 
 A terminal-like component for the browser, that fetches and runs Wasm modules in the context of a shell. 🐚
 
+Documentation for Wasmer-JS Stack can be found on the [Wasmer Docs](https://docs.wasmer.io/wasmer-js/wasmer-js).
+
 ![Wasm Terminal Demo Gif](./assets/wasm-terminal-demo.gif)
 
 ## Table of Contents
@@ -39,42 +41,45 @@ npm install --save @wasmer/wasm-terminal
 
 ## Quick Start
 
-**Javascript**
+First, We must also include the `[xterm](https://github.com/xtermjs/xterm.js/).css`. For example:
+
+```html
+<!-- This includes the external stylesheet. NOTE: The path should point to wherever you are hosting the wasm-terminal output. -->
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="./node_modules/@wasmer/wasm-terminal/lib/xterm/xterm.css"
+/>
+```
+
 
 ```javascript
 import WasmTerminal, { fetchCommandFromWAPM } from "@wasmer/wasm-terminal";
-import wasmInit, { lowerI64Imports } from "@wasmer/wasm-transformer";
-
-// URL for where the wasm-transformer wasm file is located. This is probably different depending on your bundler.
-const wasmTransformerWasmUrl =
-  "./node_modules/@wasmer/wasm-transformer/wasm_transformer_bg.wasm";
+import { lowerI64Imports } from "@wasmer/wasm-transformer";
 
 // Let's write handler for the fetchCommand property of the WasmTerminal Config.
-const fetchCommandHandler = async commandName => {
+const fetchCommandHandler = async ({args}) => {
+  let commandName = args[0];
   // Let's return a "CallbackCommand" if our command matches a special name
   if (commandName === "callback-command") {
-    const callbackCommand = async (args, stdin) => {
-      return `Callback Command Working! Args: ${args}, stdin: ${stdin}`;
+    const callbackCommand = async (options, wasmFs) => {
+      return `Callback Command Working! Options: ${options}, fs: ${wasmFs}`;
     };
     return callbackCommand;
   }
 
   // Let's fetch a wasm Binary from WAPM for the command name.
-  const wasmBinary = await fetchCommandFromWAPM(commandName);
+  const wasmBinary = await fetchCommandFromWAPM({args});
 
-  // Initialize the Wasm Transformer, and use it to lower
-  // i64 imports from Wasi Modules, so that most Wasi modules
+  // lower i64 imports from Wasi Modules, so that most Wasi modules
   // Can run in a Javascript context.
-  await wasmInit(wasmTransformerWasmUrl);
-  return lowerI64Imports(wasmBinary);
+  return await lowerI64Imports(wasmBinary);
 };
 
 // Let's create our Wasm Terminal
 const wasmTerminal = new WasmTerminal({
   // Function that is run whenever a command is fetched
-  fetchCommand: fetchCommandHandler,
-  // IMPORTANT: This is wherever your process.worker.js file URL is hosted
-  processWorkerUrl: "./node_modules/wasm-terminal/workers/process.worker.js"
+  fetchCommand: fetchCommandHandler
 });
 
 // Let's print out our initial message
@@ -90,79 +95,11 @@ wasmTerminal.focus();
 // wasmTerminal.destroy();
 ```
 
-**Css**
+**NOTE:** Remember to include the CSS file mentioned at the beginning of the "Quick Start" section.
 
-We must also include the `[xterm](https://github.com/xtermjs/xterm.js/).css`. For example:
+## Reference API
 
-```html
-<!-- This includes the external stylesheet. NOTE: The path should point to wherever you are hosting the wasm-terminal output. -->
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="./node_modules/@wasmer/wasm-terminal/dist/xterm/xterm.css"
-/>
-```
-
-## Wasm Terminal Reference API
-
-### WasmTerminal
-
-`new WasmTerminal(WasmTerminalConfig)`
-
-Constructor for the WasmTerminal, that returns an instance of the WasmTerminal.
-
-The [WasmTerminalConfig](./lib/wasm-terminal-config.ts) can be described as the following:
-
-```typescript
-{
-  // Function that is called whenever a command is entered and returns a Promise,
-  // It takes in the name of the command being run, and expects a Uint8Array of a Wasm Binary, or a
-  // CallbackCommand (see the api below) to be returned.
-  fetchCommand: (commandName: string) => Promise<Uint8Array | CallbackCommand>
-  // URL to the /node_modules/wasm-terminal/workers/process.worker.js . This is used by the shell to
-  // to spawn web workers in Comlink, for features such as piping, /dev/stdin reading, and general performance enhancements.
-  processWorkerUrl?: string;
-}
-```
-
-CallbackCommands are functions that can be returned in the `fetchCommand` config property. They are simply Javascript callback that take in the command arguments and command stdin, and returns a Promise that resolves stdout. Since these callback commands handle `stdin` and `stdout`, that can be used as normal commands that can be piped!
-
-```typescript
-export type CallbackCommand = (
-  args: string[],
-  stdin: string
-) => Promise<string | undefined>;
-```
-
----
-
-`wasmTerminal.open(containerElement: Element)`
-
-Function to set the container of the `wasmTerminal`. `containerElement` can be any [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element).
-
----
-
-`wasmTerminal.fit()`
-
-Function to resize the terminal to fit the size of its container.
-
----
-
-`wasmTerminal.focus()`
-
-Function to [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the `wasmTerminal` element, and allow input into the shell.
-
----
-
-`wasmTerminal.print(message: string)`
-
-Function to print text to the wasmTerminal. Useful for printing a welcome message before the wasmTerminal is opened.
-
-### fetchCommandFromWAPM
-
-`fetchCommandFromWAPM(commandName: string) => Promise<Uint8Array>`
-
-Function meant to be returned in the `fetchCommand` config property of the WasmTerminal Class. This takes in the name of command, and returns a Promise that resolves a Uint8Array of the Wasm binary from WAPM.
+The Reference API Documentation can be found on the [`@wasmer/wasm-terminal` Reference API Wasmer Docs](https://docs.wasmer.io/integrations/js/reference-api/wasmer-wasm-terminal).
 
 ## Browser Compatibility
 

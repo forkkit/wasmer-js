@@ -8,7 +8,7 @@ import typescript from "rollup-plugin-typescript2";
 import json from "rollup-plugin-json";
 import compiler from "@ampproject/rollup-plugin-closure-compiler";
 import bundleSize from "rollup-plugin-bundle-size";
-import pkg from "./package.json";
+import alias from "rollup-plugin-alias";
 
 const sourcemapOption = process.env.PROD ? undefined : "inline";
 
@@ -20,6 +20,17 @@ let typescriptPluginOptions = {
 };
 
 const plugins = [
+  // Including comlink from source:
+  // https://github.com/GoogleChromeLabs/comlink/issues/366
+  alias({
+    resolve: [".js", ".ts"],
+    entries: [
+      {
+        find: "comlink",
+        replacement: `${__dirname}/node_modules/comlink/src/comlink`
+      }
+    ]
+  }),
   typescript(typescriptPluginOptions),
   resolve({
     preferBuiltins: true
@@ -34,10 +45,10 @@ const plugins = [
 
 const workerBundles = [
   {
-    input: "./workers/process.worker.ts",
+    input: "./src/workers/process.worker.ts",
     output: [
       {
-        file: "dist/workers/process.worker.js",
+        file: "lib/workers/process.worker.js",
         format: "iife",
         sourcemap: sourcemapOption,
         name: "Process"

@@ -1,5 +1,5 @@
-import { BigIntPolyfillType } from "../lib/polyfills/bigint";
-import getBigIntHrtime from "../lib/polyfills/hrtime.bigint";
+import { BigIntPolyfillType } from "../src/polyfills/bigint";
+import getBigIntHrtime from "../src/polyfills/hrtime.bigint";
 
 let hrtime: (time?: [number, number]) => BigIntPolyfillType = getBigIntHrtime(
   process.hrtime
@@ -22,11 +22,11 @@ describe("hrtime Polyfill", () => {
     // Wait for a second
     await waitForTime(1000);
     diffTime = hrtime() - start;
-    expect(diffTime > 1.0e9 && diffTime < 1.3e9).toBeTruthy();
+    expect(diffTime > 0.9e9 && diffTime < 1.4e9).toBeTruthy();
 
     // Wait an additoonal half a second
     await waitForTime(500);
     diffTime = hrtime() - start;
-    expect(diffTime > 1.5e9 && diffTime < 1.8e9).toBeTruthy();
+    expect(diffTime > 1.4e9 && diffTime < 1.9e9).toBeTruthy();
   });
 });

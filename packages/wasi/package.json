@@ -1,23 +1,25 @@
 {
   "name": "@wasmer/wasi",
-  "version": "0.1.0",
+  "version": "0.9.1",
   "description": "Isomorphic Javascript library for interacting with WASI Modules in Node.js and the Browser. 📚",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
-  "browser": "dist/index.iife.js",
-  "typings": "dist/packages/wasi/lib/index.d.ts",
+  "main": "lib/index.cjs.js",
+  "module": "lib/index.esm.js",
+  "iife": "lib/index.iife.js",
+  "typings": "lib/packages/wasi/src/index.d.ts",
   "files": [
-    "dist",
-    "package.json",
-    "../../LICENSE",
-    "README.md"
+    "lib"
   ],
   "scripts": {
     "precompile": "cd test/rs && make all",
-    "build": "npx rollup -c --environment PROD",
-    "test": "npx jest --config jest.config.js",
-    "test:watch": "npx jest --config jest.config.js --watch",
-    "docs": "npx typedoc lib/ --out docs --target es6 --theme minimal --mode file"
+    "build": "run-s build:clean build:ts build:prod",
+    "build:clean": "rm -rf lib",
+    "build:ts": "tsc -b",
+    "build:prod": "rollup -c --environment PROD",
+    "build:dev": "rollup -c --environment DEV",
+    "dev": "watch \"npm run build:dev\" src",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "docs": "typedoc src/ --out docs --target es6 --theme minimal --mode file"
   },
   "repository": {
     "type": "git",
@@ -36,7 +38,7 @@
     "es",
     "module"
   ],
-  "author": "Aaron Turner",
+  "author": "Wasmer Engineering Team <engineering@wasmer.io>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/wasmerio/wasmer-js/issues"
@@ -47,5 +49,6 @@
     "buffer-es6": "^4.9.3",
     "path-browserify": "^1.0.0",
     "randomfill": "^1.0.4"
-  }
+  },
+  "gitHead": "889c22135c81610ddecbb696f8ef24f7ecaf5db7"
 }

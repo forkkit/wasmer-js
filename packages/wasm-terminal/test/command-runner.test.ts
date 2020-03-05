@@ -1,6 +1,7 @@
-import CommandRunner from "../lib/command-runner/command-runner";
+import CommandRunner from "../src/command-runner/command-runner";
+
 // Need to mock process inside command runner.
-jest.mock("../lib/process/process", () => {
+jest.mock("../src/process/process", () => {
   return jest.fn().mockImplementation(() => {
     return { mock: () => {} };
   });
@@ -33,6 +34,8 @@ const cowsayPipedToLolcatAst = [
   }
 ];
 
+const wasmFsMock = {};
+
 describe("CommandRunner", () => {
   let commandRunner: any;
   let isFinishedRunningPromise: Promise<any>;
@@ -41,7 +44,11 @@ describe("CommandRunner", () => {
   beforeEach(async () => {
     isFinishedRunningPromise = new Promise((resolve, reject) => {
       commandRunner = new CommandRunner(
-        { fetchCommand: () => Promise.resolve(new Uint8Array([])) },
+        {
+          fetchCommand: () => Promise.resolve(new Uint8Array([])),
+          // @ts-ignore
+          wasmFs: wasmFsMock
+        },
         "cowsay hi | lolcat",
         () => {},
         () => resolve()
@@ -57,7 +64,7 @@ describe("CommandRunner", () => {
         Promise.resolve({
           process: {
             start: () => {
-              commandRunner._processEndCallback(commandOptionIndex);
+              commandRunner._processEndCallback({ commandOptionIndex });
             }
           }
         })

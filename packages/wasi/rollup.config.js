@@ -49,7 +49,7 @@ const plugins = [
 
 const libBundles = [
   {
-    input: "./lib/index.ts",
+    input: "./src/index.ts",
     output: {
       file: pkg.module,
       format: "esm",
@@ -61,9 +61,9 @@ const libBundles = [
     plugins: [replace(replaceBrowserOptions), ...plugins]
   },
   {
-    input: "./lib/index.ts",
+    input: "./src/index.ts",
     output: {
-      file: pkg.browser,
+      file: pkg.iife,
       format: "iife",
       sourcemap: sourcemapOption,
       name: "WASI"
@@ -74,7 +74,7 @@ const libBundles = [
     plugins: [replace(replaceBrowserOptions), ...plugins]
   },
   {
-    input: "./lib/index.ts",
+    input: "./src/index.ts",
     output: {
       file: pkg.main,
       format: "cjs",
